@@ -1,0 +1,121 @@
+# Implementation Plan - Convert to Eval RAG System
+
+Transform the existing RAG project into an **Eval RAG (Evaluation-Driven RAG)** system that systematically measures and benchmarks retrieval and generation quality using the industry-standard **RAG Triad** (Faithfulness, Answer Relevance, Context Relevance) and Ground Truth Recall metrics.
+
+---
+
+## User Review Required
+
+> [!IMPORTANT]
+> The evaluation framework will use the configured LLM (`ChatNVIDIA` or `ChatGroq`) as an **LLM-as-a-Judge** alongside the existing HuggingFace embedding model for semantic similarity metrics. No paid proprietary evaluation platforms (like SaaS dashboards) are required—everything runs locally within this codebase.
+
+---
+
+## Architecture & Evaluation Metrics
+
+```
+  ┌────────────────────────────────────────────────────────┐
+  │                 Golden Test Dataset                    │
+  │  (Questions, Reference Ground Truths, Source Docs)     │
+  └───────────────────────────┬────────────────────────────┘
+                              │
+                              ▼
+  ┌────────────────────────────────────────────────────────┐
+  │                  RAG Pipeline Run                      │
+  │  Question ──► FAISS (Contexts) ──► LLM (Generated Ans) │
+  └───────────────────────────┬────────────────────────────┘
+                              │
+                              ▼
+  ┌────────────────────────────────────────────────────────┐
+  │                   Evaluation Engine                    │
+  │                                                        │
+  │  1. Context Relevance   : Context ◄──► Question       │
+  │  2. Faithfulness        : Answer  ◄──► Context        │
+  │  3. Answer Relevance    : Answer  ◄──► Question       │
+  │  4. Ground Truth Match  : Answer  ◄──► Ground Truth   │
+  └───────────────────────────┬────────────────────────────┘
+                              │
+                              ▼
+  ┌────────────────────────────────────────────────────────┐
+  │       Report & Diagnostics (CLI / API / JSON)          │
+  └────────────────────────────────────────────────────────┘
+```
+
+### Metrics Defined:
+1. **Faithfulness (Groundedness) (0.0 – 1.0)**:
+   - Measures whether claims in the generated answer are strictly supported by retrieved context (detects hallucinations).
+2. **Answer Relevance (0.0 – 1.0)**:
+   - Evaluates whether the generated answer directly addresses the user query.
+3. **Context Relevance / Precision (0.0 – 1.0)**:
+   - Evaluates the proportion of retrieved chunks that contain helpful information for answering the query.
+4. **Answer Semantic Similarity (0.0 – 1.0)**:
+   - Embedding cosine similarity between the generated answer and the reference ground truth answer.
+
+---
+
+## Proposed Changes
+
+### 1. Data Models & Schemas
+
+#### [NEW] [app/models/eval.py](file:///c:/Users/lenovo/OneDrive/Desktop/Rag/app/models/eval.py)
+- Pydantic models:
+  - `EvalSample`: Test item with `question`, `ground_truth` (optional), `expected_context` (optional).
+  - `EvalResultItem`: Detailed result for a single question including `contexts`, `generated_answer`, metric scores, and reasoning.
+  - `EvalReport`: Aggregate metrics summary (`avg_faithfulness`, `avg_answer_relevance`, `avg_context_relevance`, `avg_similarity`, `total_samples`, `duration_sec`).
+
+---
+
+### 2. RAG Engine Upgrade
+
+#### [MODIFY] [app/rag/engine.py](file:///c:/Users/lenovo/OneDrive/Desktop/Rag/app/rag/engine.py)
+- Update `generate_answer` / add `query_with_context(question)`:
+  - Returns structured output: `{"question": ..., "answer": ..., "contexts": [...]}` so the evaluation suite can inspect both retrieved context and final answer.
+
+---
+
+### 3. Evaluation Module
+
+#### [NEW] [app/eval/metrics.py](file:///c:/Users/lenovo/OneDrive/Desktop/Rag/app/eval/metrics.py)
+- Evaluator classes powered by LLM-as-a-Judge and HuggingFace Embeddings:
+  - `FaithfulnessEvaluator`
+  - `AnswerRelevanceEvaluator`
+  - `ContextRelevanceEvaluator`
+  - `SemanticSimilarityEvaluator`
+
+#### [NEW] [app/eval/dataset.py](file:///c:/Users/lenovo/OneDrive/Desktop/Rag/app/eval/dataset.py)
+- Golden test dataset manager:
+  - Default benchmark dataset for `data/knowledge.pdf` and `data/Handwriting Practice Paragraphs.jpg`.
+  - Loader for custom JSON/CSV datasets (`data/eval_dataset.json`).
+  - Synthetic dataset generator helper from document chunks.
+
+#### [NEW] [app/eval/runner.py](file:///c:/Users/lenovo/OneDrive/Desktop/Rag/app/eval/runner.py)
+- Orchestrates batch execution of evaluation samples against the RAG engine.
+- Computes aggregate metrics, latency stats, and generates visual markdown/JSON report cards.
+
+---
+
+### 4. CLI Runner & API Endpoints
+
+#### [NEW] [evaluate.py](file:///c:/Users/lenovo/OneDrive/Desktop/Rag/evaluate.py)
+- Standalone CLI tool to trigger RAG evaluation:
+  ```powershell
+  python evaluate.py
+  python evaluate.py --dataset data/my_custom_eval.json --output eval_results.json
+  ```
+
+#### [MODIFY] [app/api/main.py](file:///c:/Users/lenovo/OneDrive/Desktop/Rag/app/api/main.py)
+- Add `/eval/run` endpoint to run evaluations via API.
+- Add `/query` return options with context inspection.
+
+---
+
+## Verification Plan
+
+### Automated & End-to-End Tests:
+1. **Metric Unit Verification**:
+   - Test each metric evaluator on known positive (grounded, relevant) and negative (hallucinated, irrelevant) sample pairs.
+2. **Benchmark Execution**:
+   - Run `python evaluate.py` across the test dataset for `knowledge.pdf` and `Handwriting Practice Paragraphs.jpg`.
+   - Verify that output report card accurately computes scores across all 4 dimensions.
+3. **API Test**:
+   - Verify `/query` and `/eval/run` endpoints respond with correct JSON payloads.

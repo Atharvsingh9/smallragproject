@@ -1,6 +1,11 @@
 fastapi
 uvicorn
+python-multipart
 pypdf
+pymupdf
+easyocr
+Pillow
+torchvision
 langchain
 langchain-community
 langchain-text-splitters
@@ -8,3 +13,5 @@ sentence-transformers
 faiss-cpu
 langchain-huggingface
 langchain-groq
+langchain-nvidia-ai-endpoints
+

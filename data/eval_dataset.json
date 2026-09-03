@@ -1,0 +1,56 @@
+[
+  {
+    "question": "Who created Python and when was it first released?",
+    "ground_truth": "Python was created by Guido van Rossum and first released in 1991.",
+    "expected_source": "knowledge.pdf",
+    "metadata": {
+      "category": "general_knowledge",
+      "difficulty": "easy"
+    }
+  },
+  {
+    "question": "What built-in data types are available in Python according to the document?",
+    "ground_truth": "The core built-in data types mentioned are int, float, str, bool, list, tuple, dict, and set.",
+    "expected_source": "knowledge.pdf",
+    "metadata": {
+      "category": "data_types",
+      "difficulty": "medium"
+    }
+  },
+  {
+    "question": "How does Python handle errors and exceptions?",
+    "ground_truth": "Python uses try/except/finally blocks to handle exceptions gracefully and prevent programs from crashing.",
+    "expected_source": "knowledge.pdf",
+    "metadata": {
+      "category": "error_handling",
+      "difficulty": "easy"
+    }
+  },
+  {
+    "question": "What is crucial for navigating tough times according to the handwriting note?",
+    "ground_truth": "Clinging to hope is crucial for navigating tough times. It is the quiet strength that whispers to keep going and fuels resilience.",
+    "expected_source": "Handwriting Practice Paragraphs.jpg",
+    "metadata": {
+      "category": "ocr_image",
+      "difficulty": "medium"
+    }
+  },
+  {
+    "question": "What does the handwriting practice note say about how every great achievement began?",
+    "ground_truth": "Every great achievement and personal triumph began with someone refusing to succumb to despair.",
+    "expected_source": "Handwriting Practice Paragraphs.jpg",
+    "metadata": {
+      "category": "ocr_image",
+      "difficulty": "medium"
+    }
+  },
+  {
+    "question": "What is the capital of Mars?",
+    "ground_truth": "I don't know.",
+    "expected_source": null,
+    "metadata": {
+      "category": "out_of_domain",
+      "difficulty": "hard"
+    }
+  }
+]

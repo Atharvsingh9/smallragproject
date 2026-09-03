@@ -1,0 +1,78 @@
+{
+  "total_samples": 2,
+  "duration_seconds": 136.07,
+  "summary_scores": {
+    "avg_faithfulness": 0.5,
+    "avg_answer_relevance": 1.0,
+    "avg_context_relevance": 0.515,
+    "avg_semantic_similarity": 0.9042
+  },
+  "results": [
+    {
+      "question": "Who created Python and when was it first released?",
+      "generated_answer": "Python was created by Guido van Rossum and was first released in 1991.",
+      "contexts": [
+        "=== Document: knowledge.pdf ===\nPython Basics\nA concise reference covering the fundamentals of the Python programming language.\n1. Introduction to Python\nPython is a high-level, interpreted, general-purpose programming language created by Guido van Rossum\nand first released in 1991. It emphasizes code readability through significant indentation and a clean,\nsimple syntax. Python supports multiple programming paradigms, including procedural, object-oriented,",
+        "Cross-platform: runs on Windows, macOS, and Linux\n1.2 Installing and Running Python\nPython can be downloaded from python.org. Once installed, you can run the interactive interpreter by\ntyping 'python' or 'python3' in a terminal, or run a script file with 'python script.py'.\n$ python3 --version\nPython 3.12.0\n$ python3 hello.py\nHello, World!",
+        "2. Variables and Data Types\nIn Python, variables are created simply by assigning a value to a name; there is no need to declare a type\nin advance. Python automatically infers the type based on the assigned value.\nx = 10          # int\ny = 3.14        # float\nname = \"Alice\"  # str\nis_active = True  # bool\nitems = [1, 2, 3]  # list\n2.1 Core Built-in Data Types\n•\nint - whole numbers, e.g. 5, -12, 1000\n•\nfloat - decimal numbers, e.g. 3.14, -0.5\n•\nstr - text strings, e.g. \"hello\"\n•"
+      ],
+      "ground_truth": "Python was created by Guido van Rossum and first released in 1991.",
+      "scores": {
+        "faithfulness": {
+          "metric_name": "faithfulness",
+          "score": 1.0,
+          "reasoning": "The generated answer states that Python was created by Guido van Rossum and first released in 1991, which matches the information in the context. All claims are directly supported, with no unsupported or contradictory statements."
+        },
+        "answer_relevance": {
+          "metric_name": "answer_relevance",
+          "score": 1.0,
+          "reasoning": "The answer directly and concisely states that Guido van Rossum created Python and specifies the first release year as 1991, fully addressing both parts of the question."
+        },
+        "context_relevance": {
+          "metric_name": "context_relevance",
+          "score": 0.33,
+          "reasoning": "Out of the three retrieved chunks, only Chunk 1 contains information that directly answers the question (creator: Guido van Rossum, release year: 1991). Chunks 2 and 3 are unrelated to the question and provide only installation instructions and language syntax details. Therefore, only one third of the chunks are relevant, placing the relevance score in the 0.1–0.5 range."
+        },
+        "semantic_similarity": {
+          "metric_name": "semantic_similarity",
+          "score": 0.9976,
+          "reasoning": "Cosine similarity between embeddings: 0.9976"
+        }
+      },
+      "latency_seconds": 7.448
+    },
+    {
+      "question": "What built-in data types are available in Python according to the document?",
+      "generated_answer": "The document lists the following core built‑in data types in Python:\n\n- **int** – whole numbers  \n- **float** – decimal numbers  \n- **str** – text strings  \n- **bool** – boolean values (`True` or `False`)  \n- **list** – ordered, mutable collections  \n- **tuple** – ordered, immutable collections  \n- **dict** – key–value pair collections  \n- **set** – unordered collections of unique items",
+      "contexts": [
+        "2. Variables and Data Types\nIn Python, variables are created simply by assigning a value to a name; there is no need to declare a type\nin advance. Python automatically infers the type based on the assigned value.\nx = 10          # int\ny = 3.14        # float\nname = \"Alice\"  # str\nis_active = True  # bool\nitems = [1, 2, 3]  # list\n2.1 Core Built-in Data Types\n•\nint - whole numbers, e.g. 5, -12, 1000\n•\nfloat - decimal numbers, e.g. 3.14, -0.5\n•\nstr - text strings, e.g. \"hello\"\n•",
+        "•\nstr - text strings, e.g. \"hello\"\n•\nbool - True or False\n•\nlist - ordered, mutable collection, e.g. [1, 2, 3]\n•\ntuple - ordered, immutable collection, e.g. (1, 2, 3)\n•\ndict - key-value pairs, e.g. {\"a\": 1, \"b\": 2}\n•\nset - unordered collection of unique items, e.g. {1, 2, 3}\n2.2 Type Conversion\nPython provides built-in functions to convert between types, such as int(), float(), str(), and bool(). This is\ncommonly needed when reading user input, which is always returned as a string.",
+        "=== Document: knowledge.pdf ===\nPython Basics\nA concise reference covering the fundamentals of the Python programming language.\n1. Introduction to Python\nPython is a high-level, interpreted, general-purpose programming language created by Guido van Rossum\nand first released in 1991. It emphasizes code readability through significant indentation and a clean,\nsimple syntax. Python supports multiple programming paradigms, including procedural, object-oriented,"
+      ],
+      "ground_truth": "The core built-in data types mentioned are int, float, str, bool, list, tuple, dict, and set.",
+      "scores": {
+        "faithfulness": {
+          "metric_name": "faithfulness",
+          "score": 0.0,
+          "reasoning": "HTTPSConnectionPool(host='integrate.api.nvidia.com', port=443): Read timed out. (read timeout=60)"
+        },
+        "answer_relevance": {
+          "metric_name": "answer_relevance",
+          "score": 1.0,
+          "reasoning": "The answer lists all core built‑in data types (int, float, str, bool, list, tuple, dict, set) that the document references, directly and succinctly answering the question with no irrelevant content."
+        },
+        "context_relevance": {
+          "metric_name": "context_relevance",
+          "score": 0.7,
+          "reasoning": "Chunks 1 and 2 each contain explicit lists of built‑in data types (int, float, str, bool, list, tuple, dict, set), directly answering the question. Chunk 3 is a generic document header with no type information and is therefore irrelevant. Out of three retrieved chunks, two are relevant, yielding a relevance ratio of 2/3, which falls into the 0.6–0.9 range."
+        },
+        "semantic_similarity": {
+          "metric_name": "semantic_similarity",
+          "score": 0.8109,
+          "reasoning": "Cosine similarity between embeddings: 0.8109"
+        }
+      },
+      "latency_seconds": 10.55
+    }
+  ]
+}

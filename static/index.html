@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OmniRAG &bull; Intelligent OCR &amp; Evaluation Platform</title>
+  <meta name="description" content="Production-ready RAG application with Deep-Learning OCR and Live Benchmark Evaluation.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="background-glow glow-1"></div>
+  <div class="background-glow glow-2"></div>
+
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="logo-area">
+        <div class="logo-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+          </svg>
+        </div>
+        <div>
+          <h1 class="app-title">OmniRAG <span class="badge badge-accent">OCR &amp; Eval</span></h1>
+          <p class="app-subtitle">Intelligent Document Retrieval, Vision OCR &amp; Benchmark Evaluation</p>
+        </div>
+      </div>
+      <div class="header-stats">
+        <div class="stat-pill" id="status-pill">
+          <span class="status-dot"></span>
+          <span id="system-status-text">System Active</span>
+        </div>
+        <div class="stat-pill">
+          <span class="stat-icon">📄</span>
+          <span id="doc-count-badge">0 Documents</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="nav-tabs" role="tablist">
+      <button class="nav-tab active" id="tab-chat" role="tab" aria-selected="true" onclick="switchTab('chat')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+        </svg>
+        RAG Assistant
+      </button>
+      <button class="nav-tab" id="tab-docs" role="tab" aria-selected="false" onclick="switchTab('docs')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="12" y1="18" x2="12" y2="12"></line>
+          <line x1="9" y1="15" x2="15" y2="15"></line>
+        </svg>
+        Documents &amp; OCR Ingestion
+      </button>
+      <button class="nav-tab" id="tab-eval" role="tab" aria-selected="false" onclick="switchTab('eval')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+        </svg>
+        Eval RAG Benchmarks
+      </button>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+
+      <!-- TAB 1: RAG Assistant -->
+      <section id="panel-chat" class="tab-panel active" role="tabpanel">
+        <div class="chat-layout">
+          <div class="chat-container">
+            <div class="chat-messages" id="chat-messages">
+              <div class="message message-bot">
+                <div class="message-avatar">AI</div>
+                <div class="message-bubble">
+                  <p><strong>Hello! I am your AI knowledge assistant.</strong></p>
+                  <p>I can answer questions based on your indexed PDFs, scanned pages, and handwritten images using FAISS vector retrieval and EasyOCR.</p>
+                  <div class="suggestions-group">
+                    <span class="suggestion-label">Suggested Questions:</span>
+                    <div class="suggestion-pills">
+                      <button class="pill" onclick="useSuggestion(this.innerText)">Who created Python and when was it released?</button>
+                      <button class="pill" onclick="useSuggestion(this.innerText)">What is crucial for navigating tough times according to the handwriting note?</button>
+                      <button class="pill" onclick="useSuggestion(this.innerText)">What core built-in data types are available in Python?</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Controls & Options Bar -->
+            <div class="query-options-bar">
+              <div class="option-item">
+                <label for="ocr-mode-select">OCR Mode:</label>
+                <select id="ocr-mode-select" class="select-input">
+                  <option value="auto" selected>Auto (Direct + OCR Fallback)</option>
+                  <option value="force">Force OCR (All Pages)</option>
+                  <option value="off">Off (Direct Text Only)</option>
+                </select>
+              </div>
+              <div class="option-item toggle-item">
+                <label class="switch">
+                  <input type="checkbox" id="include-contexts-toggle" checked>
+                  <span class="slider round"></span>
+                </label>
+                <span class="toggle-label">Inspect Retrieved Contexts</span>
+              </div>
+            </div>
+
+            <!-- Query Input Form -->
+            <form class="chat-input-form" id="chat-form" onsubmit="handleQuerySubmit(event)">
+              <input 
+                type="text" 
+                id="query-input" 
+                class="chat-input" 
+                placeholder="Ask a question about your uploaded documents or images..." 
+                required 
+                autocomplete="off"
+              >
+              <button type="submit" id="query-submit-btn" class="btn btn-primary">
+                <span>Send</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="22" y1="2" x2="11" y2="13"></line>
+                  <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+              </button>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 2: Documents & Upload -->
+      <section id="panel-docs" class="tab-panel" role="tabpanel">
+        <div class="docs-grid">
+          <!-- Upload Zone -->
+          <div class="glass-card upload-card">
+            <h2 class="card-title">Upload New Document or Image</h2>
+            <p class="card-subtitle">Upload PDFs, scanned documents, receipts, or handwritten notes (.pdf, .jpg, .png, .webp, .tiff).</p>
+
+            <div 
+              class="dropzone" 
+              id="dropzone" 
+              onclick="document.getElementById('file-input').click()"
+              ondragover="handleDragOver(event)"
+              ondragleave="handleDragLeave(event)"
+              ondrop="handleDrop(event)"
+            >
+              <input type="file" id="file-input" class="hidden-input" accept=".pdf,.png,.jpg,.jpeg,.webp,.bmp,.tiff" onchange="handleFileSelected(event)">
+              <div class="dropzone-icon">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="17 8 12 3 7 8"></polyline>
+                  <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+              </div>
+              <p class="dropzone-text"><strong>Click to upload</strong> or drag and drop files here</p>
+              <span class="dropzone-hint">PDF documents, scanned papers, handwriting images</span>
+            </div>
+
+            <!-- Upload File Preview & Action -->
+            <div id="file-preview-area" class="file-preview-area hidden">
+              <div class="file-info">
+                <span class="file-badge" id="preview-badge">PDF</span>
+                <div>
+                  <div class="file-name" id="preview-filename">document.pdf</div>
+                  <div class="file-size" id="preview-filesize">0 KB</div>
+                </div>
+              </div>
+              <button class="btn btn-primary" id="upload-btn" onclick="uploadSelectedFile()">
+                <span>Upload &amp; Build Vector Index</span>
+              </button>
+            </div>
+
+            <!-- Upload Progress Indicator -->
+            <div id="upload-progress-area" class="progress-area hidden">
+              <div class="progress-bar-bg">
+                <div class="progress-bar-fill" id="upload-progress-bar"></div>
+              </div>
+              <div class="progress-status" id="upload-status-text">Processing OCR &amp; Vector Embeddings...</div>
+            </div>
+          </div>
+
+          <!-- Document List Card -->
+          <div class="glass-card docs-list-card">
+            <div class="card-header-row">
+              <div>
+                <h2 class="card-title">Indexed Knowledge Base</h2>
+                <p class="card-subtitle">Active documents embedded in the FAISS vector database</p>
+              </div>
+              <button class="btn btn-secondary btn-sm" onclick="reindexAllDocuments()" id="reindex-btn">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="23 4 23 10 17 10"></polyline>
+                  <polyline points="1 20 1 14 7 14"></polyline>
+                  <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                </svg>
+                Rebuild Index
+              </button>
+            </div>
+
+            <div class="document-list" id="document-list">
+              <div class="empty-state">Loading documents...</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 3: Eval RAG Benchmarks -->
+      <section id="panel-eval" class="tab-panel" role="tabpanel">
+        <div class="eval-layout">
+          <!-- Eval Header Control Card -->
+          <div class="glass-card eval-header-card">
+            <div class="eval-header-info">
+              <h2 class="card-title">RAG Quality Benchmark Suite</h2>
+              <p class="card-subtitle">Automated evaluation assessing the RAG Triad (Faithfulness, Relevance, Grounding) using LLM-as-a-Judge and Semantic Cosine Similarity.</p>
+            </div>
+            <div class="eval-actions">
+              <div class="eval-input-group">
+                <label for="eval-limit-select">Samples:</label>
+                <select id="eval-limit-select" class="select-input">
+                  <option value="2">2 Samples (Fast)</option>
+                  <option value="4" selected>4 Samples</option>
+                  <option value="6">All (6 Samples)</option>
+                </select>
+              </div>
+              <button class="btn btn-primary" id="run-eval-btn" onclick="runBenchmarkEvaluation()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                </svg>
+                <span>Run Evaluation Benchmark</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Evaluation Metric Overview Cards -->
+          <div class="metrics-grid">
+            <div class="glass-card metric-card">
+              <div class="metric-icon">🎯</div>
+              <div class="metric-data">
+                <div class="metric-label">Faithfulness (Groundedness)</div>
+                <div class="metric-value" id="metric-faithfulness">--%</div>
+                <div class="metric-desc">Checks if answer claims are 100% supported by context without hallucinations.</div>
+              </div>
+            </div>
+
+            <div class="glass-card metric-card">
+              <div class="metric-icon">💬</div>
+              <div class="metric-data">
+                <div class="metric-label">Answer Relevance</div>
+                <div class="metric-value" id="metric-answer-relevance">--%</div>
+                <div class="metric-desc">Evaluates how directly and completely the generated answer addresses the question.</div>
+              </div>
+            </div>
+
+            <div class="glass-card metric-card">
+              <div class="metric-icon">🔍</div>
+              <div class="metric-data">
+                <div class="metric-label">Context Relevance</div>
+                <div class="metric-value" id="metric-context-relevance">--%</div>
+                <div class="metric-desc">Measures the percentage of retrieved chunks that contain useful information.</div>
+              </div>
+            </div>
+
+            <div class="glass-card metric-card">
+              <div class="metric-icon">📐</div>
+              <div class="metric-data">
+                <div class="metric-label">Semantic Similarity</div>
+                <div class="metric-value" id="metric-similarity">--%</div>
+                <div class="metric-desc">Embedding cosine distance comparing generated output to ground truth.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Detailed Sample Benchmark Breakdown -->
+          <div class="glass-card eval-details-card">
+            <div class="card-header-row">
+              <h2 class="card-title">Detailed Evaluation Results</h2>
+              <span class="badge" id="eval-duration-badge">Awaiting Run</span>
+            </div>
+            <div class="eval-results-container" id="eval-results-container">
+              <div class="empty-state">
+                <p>No evaluation run yet. Click <strong>"Run Evaluation Benchmark"</strong> above to benchmark retrieval and generation quality.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
